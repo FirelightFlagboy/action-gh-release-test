@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  draft-release:
+  test-release:
     runs-on: ubuntu-22.04
     steps:
       - name: Get sample data
@@ -19,7 +19,8 @@ jobs:
           sha256sum sample-file.txt > sample-file.txt.sha256
           echo "checksum=sha256:$(cut -f 1 -d ' ' sample-file.txt.sha256)" | tee -a $GITHUB_OUTPUT
 
-      - uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+      # - uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+      - uses: FirelightFlagboy/action-gh-release@58fed080aaa4be111f1b7c31013ceeb8d68e0172
         with:
           name: Draft test
           tag_name: draft
@@ -33,7 +34,8 @@ jobs:
 
             Checksum of sample-file: ${{ steps.data.outputs.checksum}}
 
-      - uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+      # - uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+      - uses: FirelightFlagboy/action-gh-release@58fed080aaa4be111f1b7c31013ceeb8d68e0172
         with:
           name: Prerelease test
           tag_name: prerelease
@@ -47,7 +49,8 @@ jobs:
 
             Checksum of sample-file: ${{ steps.data.outputs.checksum}}
 
-      - uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+      # - uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+      - uses: FirelightFlagboy/action-gh-release@58fed080aaa4be111f1b7c31013ceeb8d68e0172
         with:
           name: Release test
           tag_name: release
