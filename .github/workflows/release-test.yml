@@ -1,0 +1,62 @@
+name: Release test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  draft-release:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Get current date
+        id: data
+        run: |
+          (echo A sample file generated at; echo date=$(date --rfc-3339=seconds) | tee -a $GITHUB_OUTPUT) | tee sample-file.txt
+          sha256sum sample-file.txt > sample-file.txt.sha256
+          echo "checksum=sha256:$(cut -f 1 -d ' ' sample-file.txt.sha256)" | tee -a $GITHUB_OUTPUT
+
+      - uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+        with:
+          name: Draft test
+          tag_name: draft
+          draft: true
+          fail_on_unmatched_files: true
+          files: |
+            sample-file.txt
+            sample-file.txt.sha256
+          body: |
+            Draft generated at ${{ steps.data.outputs.date }}
+
+            Checksum of sample-file: ${{ steps.data.outputs.checksum}}
+
+      - uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+        with:
+          name: Prerelease test
+          tag_name: prerelease
+          prerelease: true
+          fail_on_unmatched_files: true
+          files: |
+            sample-file.txt
+            sample-file.txt.sha256
+          body: |
+            Pre-reelase generated at ${{ steps.data.outputs.date }}
+
+            Checksum of sample-file: ${{ steps.data.outputs.checksum}}
+
+      - uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+        with:
+          name: Release test
+          tag_name: release
+          prerelease: true
+          fail_on_unmatched_files: true
+          files: |
+            sample-file.txt
+            sample-file.txt.sha256
+          body: |
+            Release generated at ${{ steps.data.outputs.date }}
+
+            Checksum of sample-file: ${{ steps.data.outputs.checksum}}
