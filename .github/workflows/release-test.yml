@@ -12,6 +12,16 @@ jobs:
   test-release:
     runs-on: ubuntu-22.04
     steps:
+      - name: Remove release
+        run: |
+          set -x
+          for release in draft prerelease release; do
+            gh release --repo=${{ github.server_url }}/${{ github.repository }} delete $release
+          done
+        continue-on-error: true
+        env:
+            GH_TOKEN: ${{ github.token }}
+
       - name: Get sample data
         id: data
         run: |
@@ -20,7 +30,7 @@ jobs:
           echo "checksum=sha256:$(cut -f 1 -d ' ' sample-file.txt.sha256)" | tee -a $GITHUB_OUTPUT
 
       # - uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
-      - uses: FirelightFlagboy/action-gh-release@58fed080aaa4be111f1b7c31013ceeb8d68e0172
+      - uses: FirelightFlagboy/action-gh-release@5f81454e6f7b173522c7de8709330e0fdd881d49
         with:
           name: Draft test
           tag_name: draft
@@ -35,7 +45,7 @@ jobs:
             Checksum of sample-file: ${{ steps.data.outputs.checksum}}
 
       # - uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
-      - uses: FirelightFlagboy/action-gh-release@58fed080aaa4be111f1b7c31013ceeb8d68e0172
+      - uses: FirelightFlagboy/action-gh-release@5f81454e6f7b173522c7de8709330e0fdd881d49
         with:
           name: Prerelease test
           tag_name: prerelease
@@ -50,7 +60,7 @@ jobs:
             Checksum of sample-file: ${{ steps.data.outputs.checksum}}
 
       # - uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
-      - uses: FirelightFlagboy/action-gh-release@58fed080aaa4be111f1b7c31013ceeb8d68e0172
+      - uses: FirelightFlagboy/action-gh-release@5f81454e6f7b173522c7de8709330e0fdd881d49
         with:
           name: Release test
           tag_name: release
@@ -63,3 +73,64 @@ jobs:
             Release generated at ${{ steps.data.outputs.date }}
 
             Checksum of sample-file: ${{ steps.data.outputs.checksum}}
+
+      - name: Get sample data
+        id: new_data
+        run: |
+          (echo A new sample file generated at; echo date=$(date --rfc-3339=seconds --utc) | tee -a $GITHUB_OUTPUT) | tee new-sample-file.txt
+          sha256sum sample-file.txt > new-sample-file.txt.sha256
+          echo "checksum=sha256:$(cut -f 1 -d ' ' sample-file.txt.sha256)" | tee -a $GITHUB_OUTPUT
+
+      # - uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+      - uses: FirelightFlagboy/action-gh-release@5f81454e6f7b173522c7de8709330e0fdd881d49
+        with:
+          name: Draft test
+          tag_name: draft
+          draft: true
+          fail_on_unmatched_files: true
+          files: |
+            sample-file.txt
+            sample-file.txt.sha256
+            new-sample-file.txt
+            new-sample-file.txt.sha256
+          body: |
+            Draft generated at ${{ steps.new_data.outputs.date }}
+
+            Checksum of sample-file: ${{ steps.data.outputs.checksum}}
+            Checksum of new-sample-file: ${{ steps.new_data.outputs.checksum}}
+
+      # - uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+      - uses: FirelightFlagboy/action-gh-release@5f81454e6f7b173522c7de8709330e0fdd881d49
+        with:
+          name: Prerelease test
+          tag_name: prerelease
+          prerelease: true
+          fail_on_unmatched_files: true
+          files: |
+            sample-file.txt
+            sample-file.txt.sha256
+            new-sample-file.txt
+            new-sample-file.txt.sha256
+          body: |
+            Pre-reelase generated at ${{ steps.new_data.outputs.date }}
+
+            Checksum of sample-file: ${{ steps.data.outputs.checksum}}
+            Checksum of new-sample-file: ${{ steps.new_data.outputs.checksum}}
+
+      # - uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+      - uses: FirelightFlagboy/action-gh-release@5f81454e6f7b173522c7de8709330e0fdd881d49
+        with:
+          name: Release test
+          tag_name: release
+          prerelease: true
+          fail_on_unmatched_files: true
+          files: |
+            sample-file.txt
+            sample-file.txt.sha256
+            new-sample-file.txt
+            new-sample-file.txt.sha256
+          body: |
+            Release generated at ${{ steps.new_data.outputs.date }}
+
+            Checksum of sample-file: ${{ steps.data.outputs.checksum}}
+            Checksum of new-sample-file: ${{ steps.new_data.outputs.checksum}}
